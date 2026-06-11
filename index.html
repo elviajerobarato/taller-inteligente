@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestor de Inventario Inteligente - Taller Automoción</title>
+    <title>SGA Inteligente V2 - Taller Automoción</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -26,17 +26,15 @@
         <header class="mb-8 border-b border-slate-700 pb-6 flex flex-col md:flex-row justify-between items-center gap-4">
             <div>
                 <h1 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">
-                    <i class="fa-solid fa-screwdriver-wrench mr-2"></i>SGA Taller Inteligente
+                    <i class="fa-solid fa-screwdriver-wrench mr-2"></i>SGA Taller Inteligente <span class="text-xs bg-cyan-500/20 text-cyan-400 px-2 py-0.5 rounded-full border border-cyan-500/30">v2.0 - DB Live</span>
                 </h1>
-                <p class="text-slate-400 text-sm mt-1">Módulos: Carrocería, Transmisiones y Electromecánica</p>
+                <p class="text-slate-400 text-sm mt-1">Sincronización en tiempo real con Supabase y Autocompletado Predictivo</p>
             </div>
             
-            <div class="bg-slate-800 p-3 rounded-lg border border-slate-700 text-xs w-full md:w-auto">
-                <div class="grid grid-cols-1 gap-2">
-                    <div>
-                        <label class="block text-slate-400 font-semibold">Gemini API Key:</label>
-                        <input type="password" id="geminiApiKey" class="bg-slate-900 text-emerald-400 px-2 py-1 rounded w-full border border-slate-600 mt-0.5" placeholder="AIzaSy...">
-                    </div>
+            <div class="bg-slate-800 p-3 rounded-lg border border-slate-700 text-xs w-full md:w-auto space-y-2">
+                <div>
+                    <label class="block text-slate-400 font-semibold">Gemini API Key:</label>
+                    <input type="password" id="geminiApiKey" class="bg-slate-900 text-emerald-400 px-2 py-1 rounded w-full border border-slate-600 mt-0.5" placeholder="AIzaSy...">
                 </div>
             </div>
         </header>
@@ -45,12 +43,19 @@
             
             <div class="space-y-6">
                 <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-xl">
-                    <h2 class="text-xl font-bold mb-4 flex items-center text-blue-400">
-                        <i class="fa-solid fa-file-excel mr-2"></i>1. Cargar Fichero (.xlsx)
+                    <h2 class="text-xl font-bold mb-3 flex items-center text-blue-400">
+                        <i class="fa-solid fa-database mr-2"></i>1. Estado del Inventario
                     </h2>
-                    <p class="text-xs text-slate-400 mb-4">Selecciona el inventario definitivo para cargarlo localmente e migrarlo a Supabase.</p>
-                    <input type="file" id="excelFile" accept=".xlsx" class="block w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-500 cursor-pointer"/>
-                    <div id="importStatus" class="mt-3 text-xs hidden"></div>
+                    
+                    <div id="dbStatusBadge" class="p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs flex items-center gap-2 mb-4">
+                        <i class="fa-solid fa-triangle-exclamation animate-pulse"></i>
+                        <span>Cargando credenciales de Supabase...</span>
+                    </div>
+
+                    <div id="uploadSection" class="hidden">
+                        <p class="text-xs text-slate-400 mb-3">La base de datos está vacía. Selecciona el archivo definitivo para inicializar el sistema:</p>
+                        <input type="file" id="excelFile" accept=".xlsx" class="block w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-500 cursor-pointer"/>
+                    </div>
                 </div>
 
                 <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-xl">
@@ -61,7 +66,10 @@
                         <div>
                             <label class="block text-sm font-medium text-slate-300 mb-1">Nombre del Útil / Consumible</label>
                             <div class="relative">
-                                <input type="text" id="searchInput" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-slate-100 focus:outline-none focus:border-cyan-500" placeholder="Ej: Llave dinamométrica, Masilla...">
+                                <input type="text" id="searchInput" list="toolsDatalist" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-slate-100 focus:outline-none focus:border-cyan-500" placeholder="Escribe para buscar...">
+                                
+                                <datalist id="toolsDatalist"></datalist>
+
                                 <button type="button" onclick="activarVozBusqueda()" class="absolute right-3 top-3 text-slate-400 hover:text-cyan-400 transition-colors">
                                     <i class="fa-solid fa-microphone text-lg" id="micIconBusqueda"></i>
                                 </button>
@@ -80,12 +88,12 @@
                 </div>
             </div>
 
-            <div class="lg:col-span-1 bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-xl flex flex-col justify-between">
+            <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-xl flex flex-col justify-between">
                 <div>
                     <h2 class="text-xl font-bold mb-2 flex items-center text-amber-400">
                         <i class="fa-solid fa-map-location-dot mr-2"></i>3. Plano Físico de Ubicación
                     </h2>
-                    <p class="text-xs text-slate-400 mb-4">El cuadrante correspondiente se iluminará en rojo para guiar al operario o alumno en el taller.</p>
+                    <p class="text-xs text-slate-400 mb-4">El cuadrante correspondiente se iluminará para guiar al operario/alumno.</p>
                 </div>
                 
                 <div class="space-y-2 text-center text-xs font-bold text-slate-900 grow flex flex-col justify-center py-4">
@@ -105,7 +113,7 @@
                     </div>
 
                     <div id="MAP_CARROCERIA" class="bg-slate-600 p-4 rounded border border-slate-500 text-slate-200 transition-all duration-300">
-                        ZONA DE CARROCERÍA <span class="font-normal text-slate-400">(Soldadora | Martillos | Remachadora)</span>
+                        ZONA DE CARROCERÍA <span class="font-normal text-slate-400">(Soldadora | Martillos)</span>
                     </div>
 
                     <div id="MAP_PREPARACION" class="bg-slate-600 p-4 rounded border border-slate-500 text-slate-200 transition-all duration-300">
@@ -113,7 +121,7 @@
                     </div>
 
                     <div class="grid grid-cols-3 gap-2">
-                        <div id="MAP_PINTURA" class="col-span-2 bg-slate-600 p-4 rounded border border-slate-500 text-slate-200 transition-all duration-300 flex items-center justify-center">CABINA DE PINTURA (Pistolas / Barniz)</div>
+                        <div id="MAP_PINTURA" class="col-span-2 bg-slate-600 p-4 rounded border border-slate-500 text-slate-200 transition-all duration-300 flex items-center justify-center">CABINA DE PINTURA</div>
                         <div id="MAP_ARMARIO3" class="bg-slate-600 p-4 rounded border border-slate-500 text-slate-200 transition-all duration-300 flex items-center justify-center">ARMARIO 3<br>(Carrocería)</div>
                     </div>
                     
@@ -129,16 +137,16 @@
                     <h2 class="text-xl font-bold mb-1 flex items-center text-purple-400">
                         <i class="fa-solid fa-robot mr-2"></i>Agente GEM de Gemini
                     </h2>
-                    <p class="text-xs text-slate-400 mb-4">Pregúntale de viva voz o escribiendo dónde está cualquier material del taller.</p>
+                    <p class="text-xs text-slate-400 mb-4">Pregúntale de viva voz o escribiendo dónde está cualquier material.</p>
                     
                     <div id="chatBox" class="bg-slate-950 p-4 rounded-lg border border-slate-800 h-80 overflow-y-auto text-sm space-y-3 custom-scrollbar">
-                        <div class="text-slate-400 text-xs text-center italic">Inicia el asistente para realizar consultas conversacionales.</div>
+                        <div class="text-slate-400 text-xs text-center italic">Iniciando comunicación con el inventario...</div>
                     </div>
                 </div>
 
                 <div class="mt-4">
                     <div class="flex gap-2">
-                        <button type="button" onclick="activarVozChat()" class="bg-purple-600 hover:bg-purple-500 p-3 rounded-lg text-white transition-colors" title="Hablar con GEM">
+                        <button type="button" onclick="activarVozChat()" class="bg-purple-600 hover:bg-purple-500 p-3 rounded-lg text-white transition-colors">
                             <i class="fa-solid fa-microphone-lines text-lg" id="micIconChat"></i>
                         </button>
                         <input type="text" id="chatInput" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-slate-100 text-sm focus:outline-none focus:border-purple-500" placeholder="Pregunta al Agente GEM..." onkeypress="if(event.key === 'Enter') enviarMensajeChat()">
@@ -153,20 +161,82 @@
     </div>
 
     <script>
-        // CONFIGURACIÓN DE BASE DE DATOS SUPABASE
+        // ⚠️ ENLACE EXCLUSIVO CON TU BASE DE DATOS SUPABASE
         const SUPABASE_URL = "https://TU_PROYECTO_SUPABASE.supabase.co"; 
         const SUPABASE_KEY = "TU_ANON_KEY_SUPABASE";
-        let supabaseClient = null;
         
-        // Inicialización segura si se modifican las constantes superiores
-        if(SUPABASE_URL !== "https://TU_PROYECTO_SUPABASE.supabase.co") {
-            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        let supabaseClient = null;
+        let inventarioMemoria = []; // Caché local para optimizar rendimiento y autocompletado
+
+        // Inicialización de la App al cargar el DOM
+        window.addEventListener('DOMContentLoaded', async () => {
+            configurarSupabase();
+            await comprobarYVerificarBaseDatos();
+        });
+
+        function configurarSupabase() {
+            if (SUPABASE_URL && SUPABASE_URL !== "https://TU_PROYECTO_SUPABASE.supabase.co") {
+                supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            }
         }
 
-        // Base de Datos en memoria local (Fallback inmediato si no hay Supabase configurado)
-        let inventarioLocal = [];
+        // FUNCIÓN CLAVE: Comprueba si ya hay datos en la nube sin necesidad de volver a pedir el archivo
+        async function comprobarYVerificarBaseDatos() {
+            const statusBadge = document.getElementById('dbStatusBadge');
+            const uploadSection = document.getElementById('uploadSection');
 
-        // 1. PROCESAMIENTO E IMPORTACIÓN DEL EXCEL (.XLSX)
+            if (!supabaseClient) {
+                statusBadge.className = "p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-xs";
+                statusBadge.innerHTML = `<i class="fa-solid fa-plug-polyline mr-1"></i> Supabase no configurado. Trabajando en modo local temporal.`;
+                uploadSection.classList.remove('hidden');
+                return;
+            }
+
+            try {
+                // Consultamos el conteo total de filas de la tabla 'inventario'
+                const { data, error, count } = await supabaseClient
+                    .from('inventario')
+                    .select('*', { count: 'exact' });
+
+                if (error) throw error;
+
+                if (count > 0) {
+                    // ¡Éxito! Ya hay datos guardados previamente.
+                    inventarioMemoria = data;
+                    
+                    statusBadge.className = "p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs flex items-center gap-2";
+                    statusBadge.innerHTML = `<i class="fa-solid fa-database-solid fa-circle-check text-emerald-500"></i> <span><strong>Base de datos ACTIVA:</strong> Se detectaron ${count} herramientas listas en Supabase. No se requiere subir archivo.</span>`;
+                    uploadSection.classList.add('hidden'); // Ocultamos el input de carga
+                    
+                    generarAutocompletado();
+                    appendChatMessage("Sistema", `Conexión con base de datos exitosa. ${count} elementos cargados y listos en la nube.`);
+                } else {
+                    // La tabla existe pero está completamente vacía
+                    statusBadge.className = "p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs";
+                    statusBadge.innerHTML = `<i class="fa-solid fa-folder-open mr-1"></i> La base de datos en Supabase está vacía. Por favor, inicializa el fichero XLSX.`;
+                    uploadSection.classList.remove('hidden');
+                }
+            } catch (err) {
+                console.error(err);
+                statusBadge.className = "p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-xs";
+                statusBadge.innerHTML = `<i class="fa-solid fa-circle-xmark mr-1"></i> Error al conectar con la tabla 'inventario'. Revisa el SQL Editor.`;
+                uploadSection.classList.remove('hidden');
+            }
+        }
+
+        // GENERADOR DINÁMICO DE AUTOCOMPLETADO (DATA LIST)
+        function generarAutocompletado() {
+            const datalist = document.getElementById('toolsDatalist');
+            datalist.innerHTML = ""; // Limpiamos opciones previas
+            
+            inventarioMemoria.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item.herramienta; // El valor predictivo que verá el usuario
+                datalist.appendChild(option);
+            });
+        }
+
+        // PROCESAMIENTO E INSERCIÓN CUANDO LA BASE DE DATOS ESTÁ VACÍA
         document.getElementById('excelFile').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
@@ -175,42 +245,56 @@
             reader.onload = async function(e) {
                 const data = new Uint8Array(e.target.result);
                 const workbook = XLSX.read(data, {type: 'array'});
-                const sheetName = workbook.SheetNames[0];
-                const sheet = workbook.Sheets[sheetName];
-                
-                // Convertir a formato JSON plano
-                // Saltamos las 3 primeras filas de títulos estéticos para pillar las cabeceras reales
+                const sheet = workbook.Sheets[workbook.SheetNames[0]];
                 const rawJson = XLSX.utils.sheet_to_json(sheet, {range: 3});
                 
-                inventarioLocal = rawJson.map(row => ({
+                const filtrado = rawJson.map(row => ({
                     herramienta: row["Herramienta / Consumible"] || row["herramienta"],
-                    cantidad: row["Cantidad"] || row["cantidad"],
+                    cantidad: String(row["Cantidad"] || row["cantidad"]),
                     ubicacion: row["Ubicación (Armario / Estantería / Zona)"] || row["ubicacion"]
                 })).filter(item => item.herramienta);
 
-                document.getElementById('importStatus').className = "mt-3 text-xs text-emerald-400 font-semibold block";
-                document.getElementById('importStatus').innerHTML = `<i class="fa-solid fa-circle-check mr-1"></i> Se han procesado ${inventarioLocal.length} elementos correctamente en la sesión actual.`;
-                
-                // Intento de volcado automático a Supabase si está enlazado
-                if (supabaseClient) {
-                    const { error } = await supabaseClient.from('inventario').insert(inventarioLocal);
+                if (supabaseClient && filtrado.length > 0) {
+                    document.getElementById('dbStatusBadge').innerHTML = "Subiendo registros a Supabase...";
+                    const { error } = await supabaseClient.from('inventario').insert(filtrado);
+                    
                     if(!error) {
-                        document.getElementById('importStatus').innerHTML += " ¡Sincronizado con Supabase con éxito!";
+                        await comprobarYVerificarBaseDatos(); // Refresca y bloquea interfaz
                     } else {
-                        console.error("Error al subir a Supabase: ", error);
+                        alert("Error al volcar datos: " + error.message);
                     }
+                } else {
+                    // Fallback local si no hay backend activo
+                    inventarioMemoria = filtrado;
+                    generarAutocompletado();
+                    document.getElementById('dbStatusBadge').innerHTML = "Carga local completada (Sin persistencia en la nube).";
                 }
-                appendChatMessage("Sistema", "¡Nuevo inventario cargado en el sistema! Estoy listo para ubicar cualquier elemento.");
             };
             reader.readAsArrayBuffer(file);
         });
 
-        // 2. MÓDULO DE BÚSQUEDA TRADICIONAL Y RESALTADO DE MAPA VISUAL
-        function ejecutarBusquedaManual() {
+        // MOTOR DE BÚSQUEDA INTEGRADO A LA BASE DE DATOS REAL (O CACHÉ)
+        async function ejecutarBusquedaManual() {
             const query = document.getElementById('searchInput').value.trim();
             if(!query) return;
 
-            const resultado = buscarElemento(query);
+            let resultado = null;
+
+            if (supabaseClient) {
+                // Realizamos consulta directa a Supabase aplicando coincidencia insensible a mayúsculas
+                const { data, error } = await supabaseClient
+                    .from('inventario')
+                    .select('*')
+                    .ilike('herramienta', `%${query}%`)
+                    .limit(1);
+                
+                if (!error && data.length > 0) resultado = data[0];
+            } else {
+                // Búsqueda en memoria local fallback
+                resultado = inventarioMemoria.find(item => 
+                    item.herramienta.toLowerCase().includes(query.toLowerCase())
+                );
+            }
             
             if(resultado) {
                 document.getElementById('searchResultCard').classList.remove('hidden');
@@ -218,7 +302,6 @@
                 document.getElementById('resCant').innerText = resultado.cantidad;
                 document.getElementById('resUbic').innerText = resultado.ubicacion;
                 
-                // Activar el iluminador visual en el mapa
                 iluminarPlano(resultado.ubicacion);
             } else {
                 document.getElementById('searchResultCard').classList.add('hidden');
@@ -226,25 +309,15 @@
             }
         }
 
-        function buscarElemento(termino) {
-            return inventarioLocal.find(item => 
-                item.herramienta.toLowerCase().includes(termino.toLowerCase())
-            );
-        }
-
-        // 3. ASIGNACIÓN DINÁMICA DE ZONA FÍSICA (ILUMINACIÓN DEL PLANO)
+        // CÓDIGO DEL PLANO VISUAL
         function resetearPlano() {
             const ids = ["MAP_ELEVACION", "MAP_ARMARIO1", "MAP_TRANSMISIONES", "MAP_ARMARIO2", "MAP_ARMARIO4", "MAP_ELECTROMECANICA", "MAP_CARROCERIA", "MAP_PREPARACION", "MAP_PINTURA", "MAP_ARMARIO3", "MAP_MURAL", "MAP_CAJONERAS"];
-            ids.forEach(id => {
-                const el = document.getElementById(id);
-                if(el) el.classList.remove('highlight-zone');
-            });
+            ids.forEach(id => { const el = document.getElementById(id); if(el) el.classList.remove('highlight-zone'); });
         }
 
         function iluminarPlano(ubicacionTexto) {
             resetearPlano();
             const u = ubicacionTexto.toUpperCase();
-            
             if(u.includes("ARMARIO 1")) document.getElementById("MAP_ARMARIO1").classList.add('highlight-zone');
             else if(u.includes("ARMARIO 2")) document.getElementById("MAP_ARMARIO2").classList.add('highlight-zone');
             else if(u.includes("ARMARIO 3")) document.getElementById("MAP_ARMARIO3").classList.add('highlight-zone');
@@ -259,44 +332,23 @@
             else if(u.includes("CAJONERAS")) document.getElementById("MAP_CAJONERAS").classList.add('highlight-zone');
         }
 
-        // 4. ACCESIBILIDAD POR VOZ (ALERTA DE HERRAMIENTA AUSENTE / CONTROL POR VOZ)
+        // ALERTAS POR SÍNTESIS DE VOZ TRADICIONAL
         function notificarHerramientaAusente(nombreHerramienta) {
-            const mensaje = `Atención: No se dispone de la herramienta o consumible ${nombreHerramienta} en el inventario actual del taller.`;
-            // Alerta visual
-            alert(mensaje);
-            // Alerta por síntesis de voz (Text to Speech)
+            const mensaje = `No se dispone de dicha herramienta.`;
+            alert(`Alerta: El sistema informa que "${nombreHerramienta}" no está registrado.`);
             hablar(mensaje);
         }
 
         function hablar(texto) {
             if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel(); // Detener cualquier locución previa
                 const utterance = new SpeechSynthesisUtterance(texto);
                 utterance.lang = 'es-ES';
                 window.speechSynthesis.speak(utterance);
             }
         }
 
-        // Reconocimiento de Voz (Web Speech API) para el formulario tradicional
-        function activarVozBusqueda() {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!SpeechRecognition) { alert("Tu navegador no soporta entrada de voz."); return; }
-            
-            const recognition = new SpeechRecognition();
-            recognition.lang = 'es-ES';
-            const mic = document.getElementById('micIconBusqueda');
-            
-            recognition.onstart = () => mic.className = "fa-solid fa-microphone text-lg text-red-500 animate-pulse";
-            recognition.onend = () => mic.className = "fa-solid fa-microphone text-lg text-slate-400";
-            
-            recognition.onresult = (event) => {
-                const textoEscuchado = event.results[0][0].transcript;
-                document.getElementById('searchInput').value = textoEscuchado.replace(/\.$/, '');
-                ejecutarBusquedaManual();
-            };
-            recognition.start();
-        }
-
-        // 5. MÓDULO INTELIGENTE: CONEXIÓN CLIENTE A GEMINI API (CON TEXTO O RECONOCIMIENTO DE VOZ)
+        // ENLACE CON LA API INTELIGENTE DE GEMINI (CON REDIRECCIÓN AUTOMÁTICA A LA DB ACTUALIZADA)
         async function enviarMensajeChat() {
             const inputEl = document.getElementById('chatInput');
             const userMsg = inputEl.value.trim();
@@ -307,27 +359,23 @@
 
             const apiKey = document.getElementById('geminiApiKey').value.trim();
             if(!apiKey) {
-                // Modo Simulado Educativo local si el estudiante no tiene API Key metida aún
-                procesarConsultaLocalSimulada(userMsg);
+                // Ejecución offline / simulación inteligente en base a la DB de Supabase descargada
+                procesarConsultaChatLocal(userMsg);
                 return;
             }
 
-            // Llamada nativa a la API de Gemini (Usa el modelo ligero gemini-1.5-flash)
             const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+            const contextoInventario = JSON.stringify(inventarioMemoria);
             
-            // Construcción del contexto del Inventario para inyectarlo al prompt (RAG en cliente)
-            const contextoInventario = JSON.stringify(inventarioLocal);
-            const promptCompleto = `Eres GEM, el agente inteligente del taller mecánico automotriz. Tu única tarea es asistir en la localización de herramientas en base a este inventario real en formato JSON: ${contextoInventario}. 
-            El usuario te pregunta: "${userMsg}". 
-            Responde de forma muy concisa indicando la ubicación exacta y la cantidad si existe. Si la herramienta NO existe o no se menciona claramente en el JSON proveído, debes responder exactamente de esta forma: "No se dispone de dicha herramienta". No inventes ubicaciones.`;
+            const promptCompleto = `Eres GEM, el asistente de voz del taller. Tu conocimiento es este inventario real extraído de Supabase: ${contextoInventario}.
+            El usuario te dice: "${userMsg}". 
+            Responde brevemente con su localización y cantidad si existe. Si el elemento NO existe en el JSON, responde obligatoriamente de forma exacta: "No se dispone de dicha herramienta". No agregues más texto explicativo si no existe.`;
 
             try {
                 const response = await fetch(endpoint, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: promptCompleto }] }]
-                    })
+                    body: JSON.stringify({ contents: [{ parts: [{ text: promptCompleto }] }] })
                 });
                 
                 const resData = await response.json();
@@ -335,74 +383,62 @@
                 
                 appendChatMessage("GEM", aiResponse);
                 hablar(aiResponse);
-
-                // Si la IA responde ubicando algo, intentamos buscar qué zona iluminar
                 detectarEIluminarZonaDesdeIa(aiResponse);
 
-                if(aiResponse.toLowerCase().includes("no se dispone")) {
-                    resetearPlano();
-                }
+                if(aiResponse.toLowerCase().includes("no se dispone")) resetearPlano();
 
             } catch (err) {
-                console.error(err);
-                appendChatMessage("Sistema (Error)", "Fallo de conexión con la API de Gemini. Verifique su API Key.");
+                appendChatMessage("Sistema", "Error de comunicación con la IA. Trabajando con motor secundario.");
+                procesarConsultaChatLocal(userMsg);
             }
         }
 
-        function procesarConsultaLocalSimulada(promptUsuario) {
-            // El bot educativo busca en local de forma inteligente si no hay clave API
-            // Extrae palabras clave para simular el comportamiento
-            let encontrado = null;
-            for (let item of inventarioLocal) {
-                if(promptUsuario.toLowerCase().includes(item.herramienta.toLowerCase())) {
-                    encontrado = item;
-                    break;
-                }
-            }
+        function procesarConsultaChatLocal(promptUsuario) {
+            let encontrado = inventarioMemoria.find(item => 
+                promptUsuario.toLowerCase().includes(item.herramienta.toLowerCase())
+            );
 
             setTimeout(() => {
                 if(encontrado) {
-                    const respuesta = `He localizado el elemento: ${encontrado.herramienta}. Hay un registro de ${encontrado.cantidad} y se encuentra en: ${encontrado.ubicacion}.`;
-                    appendChatMessage("GEM (Modo Local)", respuesta);
+                    const respuesta = `Ubicado en: ${encontrado.ubicacion}. Stock disponible: ${encontrado.cantidad}.`;
+                    appendChatMessage("GEM", respuesta);
                     hablar(respuesta);
                     iluminarPlano(encontrado.ubicacion);
                 } else {
                     const respuestaFallo = "No se dispone de dicha herramienta.";
-                    appendChatMessage("GEM (Modo Local)", respuestaFallo);
+                    appendChatMessage("GEM", respuestaFallo);
                     hablar(respuestaFallo);
                     resetearPlano();
                 }
-            }, 600);
+            }, 400);
         }
 
         function detectarEIluminarZonaDesdeIa(textoIa) {
-            // Analiza el texto para disparar la iluminación del plano
             const u = textoIa.toUpperCase();
             if(u.includes("ARMARIO 1")) iluminarPlano("ARMARIO 1");
             else if(u.includes("ARMARIO 2")) iluminarPlano("ARMARIO 2");
             else if(u.includes("ARMARIO 3")) iluminarPlano("ARMARIO 3");
             else if(u.includes("ARMARIO 4")) iluminarPlano("ARMARIO 4");
-            else if(u.includes("ELEVACIÓN") || u.includes("ELEVADOR")) iluminarPlano("ELEVACIÓN");
+            else if(u.includes("ELEVACIÓN")) iluminarPlano("ELEVACIÓN");
             else if(u.includes("TRANSMISIONES")) iluminarPlano("TRANSMISIONES");
             else if(u.includes("ELECTROMECÁNICA")) iluminarPlano("ELECTROMECÁNICA");
             else if(u.includes("CARROCERÍA")) iluminarPlano("CARROCERÍA");
             else if(u.includes("PREPARACIÓN")) iluminarPlano("PREPARACIÓN");
-            else if(u.includes("PINTURA") || u.includes("CABINA")) iluminarPlano("PINTURA");
+            else if(u.includes("PINTURA")) iluminarPlano("PINTURA");
         }
 
-        function activarVozChat() {
+        // MANEJADORES DE ENTRADA POR MICROFÓNICA (VOZ)
+        function activarVozBusqueda() { API_Voz_Generica('searchInput', () => ejecutarBusquedaManual()); }
+        function activarVozChat() { API_Voz_Generica('chatInput', () => enviarMensajeChat()); }
+
+        function API_Voz_Generica(targetInputId, callback) {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!SpeechRecognition) { alert("Tu navegador no soporta entrada de voz."); return; }
+            if (!SpeechRecognition) return;
             const recognition = new SpeechRecognition();
             recognition.lang = 'es-ES';
-            const mic = document.getElementById('micIconChat');
-            
-            recognition.onstart = () => mic.className = "fa-solid fa-microphone-lines text-lg text-red-400 animate-pulse";
-            recognition.onend = () => mic.className = "fa-solid fa-microphone-lines text-lg text-white";
-            
-            recognition.onresult = (event) => {
-                document.getElementById('chatInput').value = event.results[0][0].transcript;
-                enviarMensajeChat();
+            recognition.onresult = (e) => {
+                document.getElementById(targetInputId).value = e.results[0][0].transcript.replace(/\.$/, '');
+                callback();
             };
             recognition.start();
         }
