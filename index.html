@@ -1,530 +1,530 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SGA Inteligente V4.1 - Taller Automoción</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        .highlight-zone {
-            animation: pulse-bg 1.5s infinite;
-            border: 3px solid #ef4444 !important;
-            transform: scale(1.01);
-        }
-        @keyframes pulse-bg {
-            0%, 100% { background-color: rgba(239, 68, 68, 0.15); }
-            50% { background-color: rgba(239, 68, 68, 0.55); }
-        }
-        .custom-scroll::-webkit-scrollbar { width: 6px; }
-        .custom-scroll::-webkit-scrollbar-track { background: #0f172a; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+<!DOCTYPE html><html lang="es"><head>    
+    <meta charset="UTF-8">    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">    
+    <title>SGA Inteligente V4.3 - Taller Automoción</title>    
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">    
+    <style>        
+        .highlight-zone {            
+            animation: pulse-bg 1.5s infinite;            
+            border: 3px solid #ef4444 !important;            
+            transform: scale(1.01);        
+        }        
+        @keyframes pulse-bg {            
+            0%, 100% { background-color: rgba(239, 68, 68, 0.15); }            
+            50% { background-color: rgba(239, 68, 68, 0.55); }        
+        }        
+        .custom-scroll::-webkit-scrollbar { width: 6px; }        
+        .custom-scroll::-webkit-scrollbar-track { background: #0f172a; }        
+        .custom-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }    
     </style>
 </head>
 <body class="bg-slate-900 text-slate-100 font-sans min-h-screen">
-
-    <div class="container mx-auto px-4 py-6">
-        <header class="mb-6 border-b border-slate-800 pb-4">
-            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
-                <div>
-                    <h1 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 flex items-center gap-2">
-                        <i class="fa-solid fa-screwdriver-wrench"></i> SGA Almacén Automoción <span class="text-xs bg-blue-500/10 text-cyan-400 border border-cyan-500/20 px-2 py-0.5 rounded-full">v4.1 Stable</span>
-                    </h1>
-                    <p class="text-slate-400 text-xs mt-0.5">Selector de Excel fijo y botón de conexión manual seguro</p>
-                </div>
+    <div class="container mx-auto px-4 py-6">        
+        <header class="mb-6 border-b border-slate-800 pb-4">            
+            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">                
+                <div>                    
+                    <h1 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 flex items-center gap-2">                        
+                        <i class="fa-solid fa-screwdriver-wrench"></i> SGA Almacén Automoción <span class="text-xs bg-blue-500/10 text-cyan-400 border border-cyan-500/20 px-2 py-0.5 rounded-full">v4.3 Auto-Connect</span>                    
+                    </h1>                    
+                    <p class="text-slate-400 text-xs mt-0.5">Credenciales integradas fijas con sincronización automática en la nube</p>                
+                </div>                                
                 
-                <div class="bg-slate-800 p-3 rounded-xl border border-slate-700 text-[11px] grid grid-cols-1 md:grid-cols-4 gap-3 w-full lg:w-auto grow max-w-5xl items-end">
-                    <div>
-                        <label class="block text-slate-400 font-bold mb-0.5">Supabase Project URL:</label>
-                        <input type="text" id="sbUrl" class="w-full bg-slate-900 text-slate-200 px-2 py-1 rounded border border-slate-600 focus:border-blue-500 outline-none" placeholder="https://xxxx.supabase.co">
-                    </div>
-                    <div>
-                        <label class="block text-slate-400 font-bold mb-0.5">Supabase Anon Key API:</label>
-                        <input type="password" id="sbKey" class="w-full bg-slate-900 text-slate-200 px-2 py-1 rounded border border-slate-600 focus:border-blue-500 outline-none" placeholder="eyJhbGciOiJIUzI1NiI...">
-                    </div>
-                    <div>
-                        <label class="block text-slate-400 font-bold mb-0.5">Gemini API Key (IA de Voz):</label>
-                        <input type="password" id="geminiKey" class="w-full bg-slate-900 text-emerald-400 px-2 py-1 rounded border border-slate-600 focus:border-emerald-500 outline-none" placeholder="AIzaSy...">
-                    </div>
-                    <div>
-                        <button onclick="guardarYConectarDB()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-1.5 px-2 rounded text-xs transition-colors flex items-center justify-center gap-1 cursor-pointer">
-                            <i class="fa-solid fa-plug"></i> Conectar Sistema
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </header>
+                <div class="bg-slate-800 p-3 rounded-xl border border-slate-700 text-[11px] grid grid-cols-1 md:grid-cols-4 gap-3 w-full lg:w-auto grow max-w-5xl items-end">                    
+                    <div>                        
+                        <label class="block text-slate-400 font-bold mb-0.5">Supabase Project URL:</label>                        
+                        <input type="text" id="sbUrl" value="https://dfhehdkaezxtsrfoibac.supabase.co" class="w-full bg-slate-900 text-slate-200 px-2 py-1 rounded border border-slate-600 focus:border-blue-500 outline-none">                    
+                    </div>                    
+                    <div>                        
+                        <label class="block text-slate-400 font-bold mb-0.5">Supabase Anon Key API:</label>                        
+                        <input type="password" id="sbKey" value="TU_ANON_KEY_DE_SUPABASE_AQUI" class="w-full bg-slate-900 text-slate-200 px-2 py-1 rounded border border-slate-600 focus:border-blue-500 outline-none" placeholder="eyJhbGciOiJIUzI1NiI...">                    
+                    </div>                    
+                    <div>                        
+                        <label class="block text-slate-400 font-bold mb-0.5">Gemini API Key (IA de Voz):</label>                        
+                        <input type="password" id="geminiKey" value="TU_GEMINI_API_KEY_AQUI" class="w-full bg-slate-900 text-emerald-400 px-2 py-1 rounded border border-slate-600 focus:border-emerald-500 outline-none" placeholder="AIzaSy...">                    
+                    </div>                    
+                    <div>                        
+                        <button onclick="guardarYConectarDB()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-1.5 px-2 rounded text-xs transition-colors flex items-center justify-center gap-1 cursor-pointer">                            
+                            <i class="fa-solid fa-sync animate-spin-slow"></i> Forzar Reconexión                        
+                        </button>                    
+                    </div>                
+                </div>            
+            </div>        
+        </header>        
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            
-            <div class="space-y-6">
-                
-                <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-xl">
-                    <h2 class="text-lg font-bold mb-3 flex items-center text-blue-400 gap-2">
-                        <i class="fa-solid fa-database"></i> 1. Estado del Inventario Nube
-                    </h2>
-                    
-                    <div id="dbStatusBadge" class="p-3 rounded-lg text-xs font-medium space-y-1 bg-slate-900 border border-slate-700 mb-4">
-                        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">                        
+            <div class="space-y-6">                                
+                <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-xl">                    
+                    <h2 class="text-lg font-bold mb-3 flex items-center text-blue-400 gap-2">                        
+                        <i class="fa-solid fa-database"></i> 1. Estado del Inventario Nube                    
+                    </h2>                                        
+                    <div id="dbStatusBadge" class="p-3 rounded-lg text-xs font-medium space-y-1 bg-slate-900 border border-slate-700 mb-4"></div>                    
+                    <div id="uploadSection" class="p-3 bg-slate-950 rounded-lg border border-slate-800 space-y-3">                        
+                        <div>                            
+                            <label id="uploadLabel" class="block text-[11px] font-bold text-slate-400 mb-1">Seleccionar Fichero Excel (.xlsx):</label>                            
+                            <input type="file" id="excelFile" accept=".xlsx" class="block w-full text-xs text-slate-400 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-slate-700 file:text-slate-200 hover:file:bg-slate-600 cursor-pointer"/>                        
+                        </div>                                                
+                        <button id="btnInyectar" onclick="procesarEInyectarSupabase()" class="w-full bg-amber-600 hover:bg-amber-500 text-white font-bold py-2 rounded text-xs transition-colors hidden shadow-lg flex items-center justify-center gap-1 cursor-pointer">                            
+                            <i class="fa-solid fa-cloud-arrow-up"></i> 🚀 Ejecutar Inyección a Supabase                        
+                        </button>                    
+                    </div>                    
+                    <div class="mt-4 pt-3 border-t border-slate-700">                        
+                        <button onclick="toggleVisualizador()" class="w-full bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs py-1.5 rounded flex justify-between items-center px-3 font-medium cursor-pointer">                            
+                            <span><i class="fa-solid fa-list-check mr-1 text-emerald-400"></i> Inspeccionar filas en la nube</span>                            
+                            <i id="eyeIcon" class="fa-solid fa-chevron-down"></i>                        
+                        </button>                        
+                        <div id="dbInspector" class="hidden mt-2 max-h-40 overflow-y-auto bg-slate-950 p-2 rounded text-[10px] font-mono text-cyan-400 space-y-1 custom-scroll"></div>                    
+                    </div>                
+                </div>                
 
-                    <div id="uploadSection" class="p-3 bg-slate-950 rounded-lg border border-slate-800 space-y-3">
-                        <div>
-                            <label id="uploadLabel" class="block text-[11px] font-bold text-slate-400 mb-1">Seleccionar Fichero Excel (.xlsx):</label>
-                            <input type="file" id="excelFile" accept=".xlsx" class="block w-full text-xs text-slate-400 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-slate-700 file:text-slate-200 hover:file:bg-slate-600 cursor-pointer"/>
-                        </div>
+                <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-xl">                    
+                    <h2 class="text-lg font-bold mb-3 flex items-center text-cyan-400 gap-2">                        
+                        <i class="fa-solid fa-magnifying-glass"></i> 2. Localizador de Herramientas                    
+                    </h2>                                        
+                    <form onsubmit="event.preventDefault(); ejecutarBusquedaManual();" class="space-y-4 relative">                        
+                        <div class="relative">                            
+                            <label class="block text-xs font-medium text-slate-400 mb-1">Nombre del Útil / Consumible</label>                                                        
+                            <div class="relative">                                
+                                <input type="text" id="searchInput" autocomplete="off" class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-3 pr-10 py-2 text-sm text-slate-100 focus:outline-none focus:border-cyan-500" placeholder="Escribe para buscar (ej: alicates)...">                                                                
+                                <button type="button" onclick="activarVozBusqueda()" class="absolute right-3 top-2.5 text-slate-400 hover:text-cyan-400">                                    
+                                    <i class="fa-solid fa-microphone text-sm" id="micBusqueda"></i>                                
+                                </button>                            
+                            </div>                            
+                            <div id="customDropdown" class="absolute left-0 right-0 bg-slate-950 border border-slate-700 rounded-b-lg max-h-48 overflow-y-auto hidden z-50 text-xs shadow-2xl custom-scroll divide-y divide-slate-800"></div>                        
+                        </div>                        
+                        <button type="submit" class="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-2 rounded-lg text-xs transition-colors cursor-pointer">                            
+                            Buscar Ubicación Exacta                        
+                        </button>                    
+                    </form>                    
+                    <div id="resultCard" class="mt-4 p-3 bg-slate-900 rounded-lg border border-slate-700 hidden">                        
+                        <h3 id="resName" class="font-bold text-sm text-emerald-400">Herramienta</h3>                        
+                        <div class="text-xs mt-1 space-y-0.5 text-slate-300">                            
+                            <p><strong>Cantidad / Estado:</strong> <span id="resQty">-</span></p>                            
+                            <p><strong>Ubicación física:</strong></p>                            
+                            <div id="resLoc" class="text-cyan-400 font-medium whitespace-pre-line bg-slate-950/50 p-2 rounded border border-slate-800 mt-1 max-h-32 overflow-y-auto custom-scroll"></div>                        
+                        </div>                    
+                    </div>                
+                </div>            
+            </div>            
+
+            <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-xl flex flex-col justify-between">                
+                <div>                    
+                    <h2 class="text-lg font-bold mb-1 flex items-center text-amber-400 gap-2">                        
+                        <i class="fa-solid fa-map-location-dot"></i> 3. Plano Físico de Ubicación                    
+                    </h2>                    
+                    <p class="text-[11px] text-slate-400 mb-3">Haz clic sobre cualquier zona para ver qué herramientas contiene.</p>                
+                </div>                                
+                <div class="space-y-2 text-center text-xs font-bold text-slate-900 grow flex flex-col justify-center py-2">                    
+                    <div id="MAP_ELEVACION" onclick="filtrarHerramientasPorZona('ELEVACIÓN')" class="bg-slate-600 hover:bg-slate-500 p-3 rounded border border-slate-500 text-slate-100 transition-all duration-150 cursor-pointer select-none shadow">                        
+                        ZONA DE ELEVACIÓN <span class="block text-[9px] font-normal text-slate-300">[Elevadores | Gatos | Borriquetas]</span>                    
+                    </div>                    
+                    <div class="grid grid-cols-3 gap-1.5">                        
+                        <div id="MAP_ARMARIO1" onclick="filtrarHerramientasPorZona('ARMARIO 1')" class="bg-slate-600 hover:bg-slate-500 p-3 rounded border border-slate-500 text-slate-100 flex flex-col items-center justify-center text-[11px] transition-all duration-150 cursor-pointer select-none shadow"><b>ARMARIO 1</b><span class="text-[9px] font-normal text-slate-300">(EPIs)</span></div>                        
+                        <div id="MAP_TRANSMISIONES" onclick="filtrarHerramientasPorZona('TRANSMISIONES')" class="bg-slate-600 hover:bg-slate-500 p-3 rounded border border-slate-500 text-slate-100 text-[11px] transition-all duration-150 cursor-pointer select-none shadow">ZONA TRANSMISIONES<br><span class="text-[9px] font-normal text-slate-300">Prensas</span></div>                        
+                        <div id="MAP_ARMARIO2" onclick="filtrarHerramientasPorZona('ARMARIO 2')" class="bg-slate-600 hover:bg-slate-500 p-3 rounded border border-slate-500 text-slate-100 flex flex-col items-center justify-center text-[11px] transition-all duration-150 cursor-pointer select-none shadow"><b>ARMARIO 2</b><span class="text-[9px] font-normal text-slate-300">(Motor)</span></div>                    
+                    </div>                    
+                    <div class="grid grid-cols-3 gap-1.5">                        
+                        <div id="MAP_ARMARIO4" onclick="filtrarHerramientasPorZona('ARMARIO 4')" class="bg-slate-600 hover:bg-slate-500 p-3 rounded border border-slate-500 text-slate-100 flex flex-col items-center justify-center text-[11px] transition-all duration-150 cursor-pointer select-none shadow"><b>ARMARIO 4</b><span class="text-[9px] font-normal text-slate-300">(Electric.)</span></div>                        
+                        <div id="MAP_ELECTROMECANICA" onclick="filtrarHerramientasPorZona('ELECTROMECÁNICA')" class="col-span-2 bg-slate-600 hover:bg-slate-500 p-3 rounded border border-slate-500 text-slate-100 flex items-center justify-center transition-all duration-150 cursor-pointer select-none shadow">ZONA DE ELECTROMECÁNICA</div>                    
+                    </div>                    
+                    <div id="MAP_CARROCERIA" onclick="filtrarHerramientasPorZona('CARROCERÍA')" class="bg-slate-600 hover:bg-slate-500 p-3 rounded border border-slate-500 text-slate-100 transition-all duration-150 cursor-pointer select-none shadow">                        
+                        ZONA DE CARROCERÍA <span class="font-normal text-[10px] text-slate-300">(Soldadura / Martillos)</span>                    
+                    </div>                    
+                    <div id="MAP_PREPARACION" onclick="filtrarHerramientasPorZona('PREPARACIÓN')" class="bg-slate-600 hover:bg-slate-500 p-3 rounded border border-slate-500 text-slate-100 transition-all duration-150 cursor-pointer select-none shadow">                        
+                        ZONA DE PREPARACIÓN <span class="font-normal text-[10px] text-slate-300">(Lijadoras / Masillas)</span>                    
+                    </div>                    
+                    <div class="grid grid-cols-3 gap-1.5">                        
+                        <div id="MAP_PINTURA" onclick="filtrarHerramientasPorZona('PINTURA')" class="col-span-2 bg-slate-600 hover:bg-slate-500 p-3 rounded border border-slate-500 text-slate-100 flex items-center justify-center transition-all duration-150 cursor-pointer select-none shadow">CABINA DE PINTURA</div>                        
+                        <div id="MAP_ARMARIO3" onclick="filtrarHerramientasPorZona('ARMARIO 3')" class="bg-slate-600 hover:bg-slate-500 p-3 rounded border border-slate-500 text-slate-100 flex flex-col items-center justify-center text-[11px] transition-all duration-150 cursor-pointer select-none shadow"><b>ARMARIO 3</b><span class="text-[9px] font-normal text-slate-300">(Pinturas)</span></div>                    
+                    </div>                
+                </div>            
+            </div>            
+
+            <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-xl flex flex-col justify-between min-h-[480px]">                
+                <div>                    
+                    <h2 class="text-lg font-bold mb-1 flex items-center text-purple-400 gap-2">                        
+                        <i class="fa-solid fa-robot"></i> Asistente GEM de Gemini                    </h2>                    
+                    <p class="text-[11px] text-slate-400 mb-3">Consulta por voz o texto de manera natural.</p>                                        
+                    <div id="chatBox" class="bg-slate-950 p-3 rounded-lg border border-slate-800 h-72 overflow-y-auto text-xs space-y-2.5 custom-scroll"></div>                
+                </div>                
+                <div class="mt-3">                    
+                    <div class="flex gap-2">                        
+                        <button type="button" onclick="activarVozChat()" class="bg-purple-600 hover:bg-purple-500 p-2.5 rounded-lg text-white transition-colors">                            
+                            <i class="fa-solid fa-microphone-lines" id="micChat"></i>                        
+                        </button>                        
+                        <input type="text" id="chatInput" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 text-xs focus:outline-none focus:border-purple-500" placeholder="Pregunta dónde está un útil..." onkeypress="if(event.key === 'Enter') enviarMensajeChat()">                        
+                        <button onclick="enviarMensajeChat()" class="bg-slate-700 hover:bg-slate-600 p-2.5 rounded-lg text-white cursor-pointer transition-colors">                            
+                            <i class="fa-solid fa-paper-plane"></i>                        
+                        </button>                    
+                    </div>                
+                </div>            
+            </div>        
+        </div>    
+    </div>    
+
+    <script>        
+        let supabaseClient = null;        
+        let inventarioMemoria = [];        
+        let datosExcelPreparados = null;        
+
+        // INICIALIZACIÓN INTELIGENTE EN ARRANQUE
+        window.addEventListener('DOMContentLoaded', async () => {            
+            // Prioriza las claves guardadas en el navegador, si están vacías, respeta lo que hayas escrito en el HTML
+            if (localStorage.getItem('sga_sb_url')) document.getElementById('sbUrl').value = localStorage.getItem('sga_sb_url');            
+            if (localStorage.getItem('sga_sb_key')) document.getElementById('sbKey').value = localStorage.getItem('sga_sb_key');            
+            if (localStorage.getItem('sga_gemini_key')) document.getElementById('geminiKey').value = localStorage.getItem('sga_gemini_key');            
                         
-                        <button id="btnInyectar" onclick="procesarEInyectarSupabase()" class="w-full bg-amber-600 hover:bg-amber-500 text-white font-bold py-2 rounded text-xs transition-colors hidden shadow-lg flex items-center justify-center gap-1 cursor-pointer">
-                            <i class="fa-solid fa-cloud-arrow-up"></i> 🚀 Ejecutar Inyección a Supabase
-                        </button>
-                    </div>
+            inicializarConexionSupabase();            
+            await comprobarBaseDatosReal();            
+            configurarBuscadorEstricto();        
+        });        
 
-                    <div class="mt-4 pt-3 border-t border-slate-700">
-                        <button onclick="toggleVisualizador()" class="w-full bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs py-1.5 rounded flex justify-between items-center px-3 font-medium cursor-pointer">
-                            <span><i class="fa-solid fa-list-check mr-1 text-emerald-400"></i> Inspeccionar filas en la nube</span>
-                            <i id="eyeIcon" class="fa-solid fa-chevron-down"></i>
-                        </button>
-                        <div id="dbInspector" class="hidden mt-2 max-h-40 overflow-y-auto bg-slate-950 p-2 rounded text-[10px] font-mono text-cyan-400 space-y-1 custom-scroll">
-                            </div>
-                    </div>
-                </div>
+        function inicializarConexionSupabase() {            
+            const url = document.getElementById('sbUrl').value.trim();            
+            const key = document.getElementById('sbKey').value.trim();            
+            // Verifica que la Key no sea el placeholder inicial antes de intentar conectar
+            if (url && key && url.startsWith("https://") && !key.includes("_AQUI")) {                
+                supabaseClient = supabase.createClient(url, key);            
+            } else {                
+                supabaseClient = null;            
+            }        
+        }        
 
-                <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-xl">
-                    <h2 class="text-lg font-bold mb-3 flex items-center text-cyan-400 gap-2">
-                        <i class="fa-solid fa-magnifying-glass"></i> 2. Localizador de Herramientas
-                    </h2>
-                    
-                    <form onsubmit="event.preventDefault(); ejecutarBusquedaManual();" class="space-y-4 relative">
-                        <div class="relative">
-                            <label class="block text-xs font-medium text-slate-400 mb-1">Nombre del Útil / Consumible</label>
-                            
-                            <div class="relative">
-                                <input type="text" id="searchInput" autocomplete="off" class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-3 pr-10 py-2 text-sm text-slate-100 focus:outline-none focus:border-cyan-500" placeholder="Escribe para buscar (ej: alicates)...">
-                                
-                                <button type="button" onclick="activarVozBusqueda()" class="absolute right-3 top-2.5 text-slate-400 hover:text-cyan-400">
-                                    <i class="fa-solid fa-microphone text-sm" id="micBusqueda"></i>
-                                </button>
-                            </div>
+        async function guardarYConectarDB() {            
+            localStorage.setItem('sga_sb_url', document.getElementById('sbUrl').value.trim());            
+            localStorage.setItem('sga_sb_key', document.getElementById('sbKey').value.trim());            
+            localStorage.setItem('sga_gemini_key', document.getElementById('geminiKey').value.trim());                        
+            inicializarConexionSupabase();            
+            await comprobarBaseDatosReal();        
+        }        
 
-                            <div id="customDropdown" class="absolute left-0 right-0 bg-slate-950 border border-slate-700 rounded-b-lg max-h-48 overflow-y-auto hidden z-50 text-xs shadow-2xl custom-scroll divide-y divide-slate-800">
-                                </div>
-                        </div>
+        async function comprobarBaseDatosReal() {            
+            const badge = document.getElementById('dbStatusBadge');            
+            const inspector = document.getElementById('dbInspector');            
+            const label = document.getElementById('uploadLabel');            
 
-                        <button type="submit" class="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-2 rounded-lg text-xs transition-colors cursor-pointer">
-                            Buscar Ubicación Exacta
-                        </button>
-                    </form>
+            if (!supabaseClient) {                
+                badge.className = "p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-xs";                
+                badge.innerHTML = `<div><i class="fa-solid fa-triangle-exclamation"></i> <strong>SGA Desconectado:</strong></div>                                   
+                                   <div class="text-[11px] text-slate-400 mt-0.5">Faltan introducir las claves de Supabase reales en las cajas de texto superiores para activar la nube.</div>`;                
+                label.innerText = "Seleccionar Excel (Modo local de prueba de sesión):";                
+                inspector.innerHTML = "Falta configurar credenciales operativas.";                
+                return;            
+            }            
 
-                    <div id="resultCard" class="mt-4 p-3 bg-slate-900 rounded-lg border border-slate-700 hidden">
-                        <h3 id="resName" class="font-bold text-sm text-emerald-400">Herramienta</h3>
-                        <div class="text-xs mt-1 space-y-0.5 text-slate-300">
-                            <p><strong>Cantidad:</strong> <span id="resQty">-</span> unidades</p>
-                            <p><strong>Ubicación física:</strong> <span id="resLoc" class="text-cyan-400 font-semibold">-</span></p>
-                        </div>
-                    </div>
-                </div>
+            try {                
+                const { data, error, count } = await supabaseClient                    
+                    .from('inventario')                    
+                    .select('*', { count: 'exact' });                
 
-            </div>
+                if (error) throw error;                
+                inventarioMemoria = data || [];                
 
-            <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-xl flex flex-col justify-between">
-                <div>
-                    <h2 class="text-lg font-bold mb-1 flex items-center text-amber-400 gap-2">
-                        <i class="fa-solid fa-map-location-dot"></i> 3. Plano Físico de Ubicación
-                    </h2>
-                    <p class="text-[11px] text-slate-400 mb-3">La zona parpadeará al encontrar el elemento.</p>
-                </div>
-                
-                <div class="space-y-2 text-center text-xs font-bold text-slate-900 grow flex flex-col justify-center py-2">
-                    <div id="MAP_ELEVACION" class="bg-slate-600 p-3 rounded border border-slate-500 text-slate-100 transition-all duration-200">
-                        ZONA DE ELEVACIÓN <span class="block text-[9px] font-normal text-slate-300">[Elevadores | Gatos | Borriquetas]</span>
-                    </div>
+                if (count > 0) {                    
+                    badge.className = "p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs";                    
+                    badge.innerHTML = `<div><i class="fa-solid fa-cloud-check text-emerald-500 text-sm"></i> <strong>Base de Datos ONLINE:</strong></div>                                       
+                                       <div class="text-[11px] text-slate-300 mt-1">Conexión activa automática. Sincronizados <strong>${count} registros desde la nube</strong>.</div>`;                    
+                    label.innerText = "🔄 ¿Deseas actualizar o añadir datos? Selecciona otro Excel:";                    
+                    inspector.innerHTML = data.map(i => `• [${i.cantidad}] ${i.herramienta} ➔ ${i.ubicacion}`).join("<br>");                    
+                    setChatSystemMessage(`Conectado a Supabase. ${count} herramientas sincronizadas.`);                
+                } else {                    
+                    badge.className = "p-3 rounded-lg bg-blue-500/10 border border-blue-500/30 text-blue-400 text-xs";                    
+                    badge.innerHTML = `<div><i class="fa-solid fa-circle-info"></i> <strong>Tabla vacía en la nube:</strong></div>                                       
+                                       <div class="text-[11px] text-slate-400 mt-0.5">La tabla 'inventario' responde correctamente pero está limpia. Carga el Excel abajo.</div>`;                    
+                    label.innerText = "Seleccionar Archivo Excel Inicial (.xlsx):";                    
+                    inspector.innerHTML = "La tabla no contiene filas en Supabase.";                
+                }            
+            } catch (err) {                
+                console.error(err);                
+                badge.className = "p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-500 text-xs";                
+                badge.innerHTML = `<div><i class="fa-solid fa-circle-nodes"></i> <strong>Error de Estructura:</strong></div>                                   
+                                   <div class="text-[11px] text-slate-400 mt-1">Conectado al servidor, pero no se encuentra la tabla llamada exactamente <b>'inventario'</b>.</div>`;                
+                label.innerText = "Seleccionar Excel (.xlsx):";                
+                inspector.innerHTML = `Estructura incorrecta o tabla inexistente.`;            
+            }        
+        }        
 
-                    <div class="grid grid-cols-3 gap-1.5">
-                        <div id="MAP_ARMARIO1" class="bg-slate-600 p-3 rounded border border-slate-500 text-slate-100 flex items-center justify-center text-[11px]">ARMARIO 1<br>(EPIs)</div>
-                        <div id="MAP_TRANSMISIONES" class="bg-slate-600 p-3 rounded border border-slate-500 text-slate-100 text-[11px]">ZONA TRANSMISIONES<br><span class="text-[9px] font-normal text-slate-300">Prensas</span></div>
-                        <div id="MAP_ARMARIO2" class="bg-slate-600 p-3 rounded border border-slate-500 text-slate-100 flex items-center justify-center text-[11px]">ARMARIO 2<br>(Motor)</div>
-                    </div>
+        // CAPTURA DEL EXCEL        
+        document.getElementById('excelFile').addEventListener('change', function(e) {            
+            const file = e.target.files[0];            
+            const btn = document.getElementById('btnInyectar');            
+            if (!file) { btn.classList.add('hidden'); return; }                        
 
-                    <div class="grid grid-cols-3 gap-1.5">
-                        <div id="MAP_ARMARIO4" class="bg-slate-600 p-3 rounded border border-slate-500 text-slate-100 flex items-center justify-center text-[11px]">ARMARIO 4<br>(Electric.)</div>
-                        <div id="MAP_ELECTROMECANICA" class="col-span-2 bg-slate-600 p-3 rounded border border-slate-500 text-slate-100 flex items-center justify-center">ZONA DE ELECTROMECÁNICA</div>
-                    </div>
+            const reader = new FileReader();            
+            reader.onload = function(e) {                
+                try {                    
+                    const data = new Uint8Array(e.target.result);                    
+                    const workbook = XLSX.read(data, {type: 'array'});                    
+                    const sheet = workbook.Sheets[workbook.SheetNames[0]];                    
+                    const rawJson = XLSX.utils.sheet_to_json(sheet, {range: 3});                                        
 
-                    <div id="MAP_CARROCERIA" class="bg-slate-600 p-3 rounded border border-slate-500 text-slate-100">
-                        ZONA DE CARROCERÍA <span class="font-normal text-[10px] text-slate-300">(Soldadura / Martillos)</span>
-                    </div>
+                    datosExcelPreparados = rawJson.map(row => ({                        
+                        herramienta: row["Herramienta / Consumible"] || row["herramienta"],                        
+                        cantidad: String(row["Cantidad"] || row["cantidad"] || "1"),                        
+                        ubicacion: row["Ubicación (Armario / Estantería / Zona)"] || row["ubicacion"]                    
+                    })).filter(item => item.herramienta && item.herramienta.trim() !== "");                    
 
-                    <div id="MAP_PREPARACION" class="bg-slate-600 p-3 rounded border border-slate-500 text-slate-100">
-                        ZONA DE PREPARACIÓN <span class="font-normal text-[10px] text-slate-300">(Lijadoras / Masillas)</span>
-                    </div>
+                    if(datosExcelPreparados.length > 0) {                        
+                        btn.innerHTML = `<i class="fa-solid fa-cloud-arrow-up animate-bounce"></i> Enviar ${datosExcelPreparados.length} filas a la Nube (Evitando Duplicados)`;                        
+                        btn.classList.remove('hidden');                    
+                    } else {                        
+                        alert("Estructura de Excel no válida o vacía.");                        
+                        btn.classList.add('hidden');                    
+                    }                
+                } catch(ex) {                    
+                    alert("Error al procesar el Excel: " + ex.message);                
+                }            
+            };            
+            reader.readAsArrayBuffer(file);        
+        });        
 
-                    <div class="grid grid-cols-3 gap-1.5">
-                        <div id="MAP_PINTURA" class="col-span-2 bg-slate-600 p-3 rounded border border-slate-500 text-slate-100 flex items-center justify-center">CABINA DE PINTURA</div>
-                        <div id="MAP_ARMARIO3" class="bg-slate-600 p-3 rounded border border-slate-500 text-slate-100 flex items-center justify-center text-[11px]">ARMARIO 3<br>(Pinturas)</div>
-                    </div>
-                </div>
-            </div>
+        // INYECCIÓN DIRECTA        
+        async function procesarEInyectarSupabase() {            
+            const btn = document.getElementById('btnInyectar');            
+            if(!supabaseClient) {                
+                inventarioMemoria = datosExcelPreparados;                
+                alert(`Carga de simulación completada en local (${inventarioMemoria.length} herramientas). Recuerda conectar Supabase para persistencia.`);                
+                document.getElementById('dbStatusBadge').innerHTML = `<strong>Modo Local Temporal:</strong> Operando con ${inventarioMemoria.length} herramientas en memoria de sesión.`;                
+                btn.classList.add('hidden');                
+                return;            
+            }            
 
-            <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-xl flex flex-col justify-between min-h-[480px]">
-                <div>
-                    <h2 class="text-lg font-bold mb-1 flex items-center text-purple-400 gap-2">
-                        <i class="fa-solid fa-robot"></i> Asistente GEM de Gemini
-                    </h2>
-                    <p class="text-[11px] text-slate-400 mb-3">Consulta por voz o texto de manera natural.</p>
-                    
-                    <div id="chatBox" class="bg-slate-950 p-3 rounded-lg border border-slate-800 h-72 overflow-y-auto text-xs space-y-2.5 custom-scroll">
-                        </div>
-                </div>
+            btn.disabled = true;            
+            btn.innerHTML = "<i class='fa-solid fa-spinner animate-spin'></i> Escribiendo en Supabase de forma segura...";            
 
-                <div class="mt-3">
-                    <div class="flex gap-2">
-                        <button type="button" onclick="activarVozChat()" class="bg-purple-600 hover:bg-purple-500 p-2.5 rounded-lg text-white">
-                            <i class="fa-solid fa-microphone-lines" id="micChat"></i>
-                        </button>
-                        <input type="text" id="chatInput" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 text-xs focus:outline-none focus:border-purple-500" placeholder="Pregunta dónde está un útil..." onkeypress="if(event.key === 'Enter') enviarMensajeChat()">
-                        <button onclick="enviarMensajeChat()" class="bg-slate-700 hover:bg-slate-600 p-2.5 rounded-lg text-white cursor-pointer">
-                            <i class="fa-solid fa-paper-plane"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
+            try {                
+                const { error } = await supabaseClient                    
+                    .from('inventario')                    
+                    .upsert(datosExcelPreparados, { onConflict: 'herramienta' });                
 
-        </div>
-    </div>
+                if(error) throw error;                
 
-    <script>
-        let supabaseClient = null;
-        let inventarioMemoria = [];
-        let datosExcelPreparados = null;
+                alert("¡Base de datos actualizada! Los registros nuevos se han insertado y los existentes se han actualizado sin duplicarse.");                
+                datosExcelPreparados = null;                
+                btn.classList.add('hidden');                
+                await comprobarBaseDatosReal();            
+            } catch(err) {                
+                alert("Error en la nube: " + err.message + "\n\nVerifica si ejecutaste el comando UNIQUE en Supabase.");                
+                btn.disabled = false;                
+                btn.innerHTML = "❌ Reintentar Subida";            
+            }        
+        }        
 
-        window.addEventListener('DOMContentLoaded', async () => {
-            // Recuperar campos guardados previamente
-            document.getElementById('sbUrl').value = localStorage.getItem('sga_sb_url') || '';
-            document.getElementById('sbKey').value = localStorage.getItem('sga_sb_key') || '';
-            document.getElementById('geminiKey').value = localStorage.getItem('sga_gemini_key') || '';
-            
-            inicializarConexionSupabase();
-            await comprobarBaseDatosReal();
-            configurarBuscadorEstricto();
-        });
+        // BUSCADOR ESTRICTO MEJORADO        
+        function configurarBuscadorEstricto() {            
+            const input = document.getElementById('searchInput');            
+            const menu = document.getElementById('customDropdown');            
 
-        function inicializarConexionSupabase() {
-            const url = document.getElementById('sbUrl').value.trim();
-            const key = document.getElementById('sbKey').value.trim();
-            if (url && key && url.startsWith("https://")) {
-                supabaseClient = supabase.createClient(url, key);
-            } else {
-                supabaseClient = null;
-            }
-        }
+            input.addEventListener('input', (e) => {                
+                const text = e.target.value.trim().toLowerCase();                
+                menu.innerHTML = "";                
 
-        async function guardarYConectarDB() {
-            localStorage.setItem('sga_sb_url', document.getElementById('sbUrl').value.trim());
-            localStorage.setItem('sga_sb_key', document.getElementById('sbKey').value.trim());
-            localStorage.setItem('sga_gemini_key', document.getElementById('geminiKey').value.trim());
-            
-            inicializarConexionSupabase();
-            await comprobarBaseDatosReal();
-        }
+                if (text.length < 2) {                    
+                    menu.classList.add('hidden');                    
+                    return;                
+                }                
 
-        async function comprobarBaseDatosReal() {
-            const badge = document.getElementById('dbStatusBadge');
-            const inspector = document.getElementById('dbInspector');
-            const label = document.getElementById('uploadLabel');
+                const coincidencias = inventarioMemoria.filter(item =>                     
+                    item.herramienta.toLowerCase().includes(text)                
+                ).slice(0, 8);                 
 
-            if (!supabaseClient) {
-                badge.className = "p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-xs";
-                badge.innerHTML = `<div><i class="fa-solid fa-triangle-exclamation"></i> <strong>SGA Desconectado:</strong></div>
-                                   <div class="text-[11px] text-slate-400 mt-0.5">Por favor, escribe las credenciales de tu proyecto Supabase arriba y pulsa "Conectar Sistema".</div>`;
-                label.innerText = "Seleccionar Excel (Modo local de prueba):";
-                inspector.innerHTML = "Falta configuración de claves.";
-                return;
-            }
+                if (coincidencias.length > 0) {                    
+                    menu.classList.remove('hidden');                    
+                    coincidencias.forEach(item => {                        
+                        const divOpcion = document.createElement('div');                        
+                        divOpcion.className = "px-3 py-2 hover:bg-slate-800 cursor-pointer text-slate-200 transition-colors flex justify-between";                        
+                        divOpcion.innerHTML = `<span>${item.herramienta}</span> <span class="text-[10px] text-slate-500 italic">${item.ubicacion}</span>`;                                                
+                        divOpcion.addEventListener('click', () => {                            
+                            input.value = item.herramienta;                            
+                            menu.classList.add('hidden');                            
+                            ejecutarBusquedaManual();                        
+                        });                        
+                        menu.appendChild(divOpcion);                    
+                    });                
+                } else {                    
+                    menu.classList.add('hidden');                
+                }            
+            });            
 
-            try {
-                const { data, error, count } = await supabaseClient
-                    .from('inventario')
-                    .select('*', { count: 'exact' });
+            document.addEventListener('click', (e) => {                
+                if (!input.contains(e.target) && !menu.contains(e.target)) {                    
+                    menu.classList.add('hidden');                
+                }            
+            });        
+        }        
 
-                if (error) throw error;
-                inventarioMemoria = data || [];
+        function ejecutarBusquedaManual() {            
+            const query = document.getElementById('searchInput').value.trim();            
+            if(!query) return;            
 
-                if (count > 0) {
-                    badge.className = "p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs";
-                    badge.innerHTML = `<div><i class="fa-solid fa-cloud-check text-emerald-500 text-sm"></i> <strong>Base de Datos ONLINE:</strong></div>
-                                       <div class="text-[11px] text-slate-300 mt-1">Conexión activa. El almacén cuenta con <strong>${count} registros en la nube</strong>.</div>`;
-                    label.innerText = "🔄 ¿Deseas actualizar o añadir datos? Selecciona otro Excel:";
-                    inspector.innerHTML = data.map(i => `• [${i.cantidad}] ${i.herramienta} ➔ ${i.ubicacion}`).join("<br>");
-                    setChatSystemMessage(`Conectado a Supabase. ${count} herramientas sincronizadas.`);
-                } else {
-                    badge.className = "p-3 rounded-lg bg-blue-500/10 border border-blue-500/30 text-blue-400 text-xs";
-                    badge.innerHTML = `<div><i class="fa-solid fa-circle-info"></i> <strong>Tabla vacía en la nube:</strong></div>
-                                       <div class="text-[11px] text-slate-400 mt-0.5">La tabla 'inventario' responde correctamente pero está limpia. Selecciona el Excel abajo.</div>`;
-                    label.innerText = "Seleccionar Archivo Excel Inicial (.xlsx):";
-                    inspector.innerHTML = "La tabla no contiene filas en Supabase.";
-                }
-            } catch (err) {
-                console.error(err);
-                badge.className = "p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-500 text-xs";
-                badge.innerHTML = `<div><i class="fa-solid fa-circle-nodes"></i> <strong>Error de Estructura:</strong></div>
-                                   <div class="text-[11px] text-slate-400 mt-1">Conectado a la URL, pero no se encuentra la tabla llamada exactamente <b>'inventario'</b>.</div>`;
-                label.innerText = "Seleccionar Excel (.xlsx):";
-                inspector.innerHTML = `Estructura incorrecta o tabla inexistente.`;
-            }
-        }
+            const encontrado = inventarioMemoria.find(item =>                 
+                item.herramienta.toLowerCase() === query.toLowerCase() ||                
+                item.herramienta.toLowerCase().includes(query.toLowerCase())            );            
 
-        // CAPTURA DEL EXCEL
-        document.getElementById('excelFile').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            const btn = document.getElementById('btnInyectar');
-            if (!file) { btn.classList.add('hidden'); return; }
-            
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, {type: 'array'});
-                    const sheet = workbook.Sheets[workbook.SheetNames[0]];
-                    const rawJson = XLSX.utils.sheet_to_json(sheet, {range: 3});
-                    
-                    datosExcelPreparados = rawJson.map(row => ({
-                        herramienta: row["Herramienta / Consumible"] || row["herramienta"],
-                        cantidad: String(row["Cantidad"] || row["cantidad"] || "1"),
-                        ubicacion: row["Ubicación (Armario / Estantería / Zona)"] || row["ubicacion"]
-                    })).filter(item => item.herramienta);
+            if (encontrado) {                
+                document.getElementById('resultCard').classList.remove('hidden');                
+                document.getElementById('resName').innerText = encontrado.herramienta;                
+                document.getElementById('resQty').innerText = `${encontrado.cantidad} unidades`;                
+                document.getElementById('resLoc').innerText = encontrado.ubicacion;                
+                iluminarZonaTaller(encontrado.ubicacion);            
+            } else {                
+                document.getElementById('resultCard').classList.add('hidden');                
+                alert(`"${query}" no consta en el inventario.`);                
+                resetearPlanoTaller();            
+            }        
+        }        
 
-                    if(datosExcelPreparados.length > 0) {
-                        btn.innerHTML = `<i class="fa-solid fa-cloud-arrow-up animate-bounce"></i> Enviar ${datosExcelPreparados.length} filas a la Nube (Evitando Duplicados)`;
-                        btn.classList.remove('hidden');
-                    } else {
-                        alert("Estructura de Excel no válida.");
-                        btn.classList.add('hidden');
-                    }
-                } catch(ex) {
-                    alert("Error al procesar el Excel: " + ex.message);
-                }
-            };
-            reader.readAsArrayBuffer(file);
-        });
+        // BÚSQUEDA INVERSA: CLIC EN EL MAPA        
+        function filtrarHerramientasPorZona(zonaNombre) {            
+            iluminarZonaTaller(zonaNombre);            
+            const herramientasEnZona = inventarioMemoria.filter(item =>                 
+                item.ubicacion && item.ubicacion.toUpperCase().includes(zonaNombre.toUpperCase())            
+            );            
 
-        // INYECCIÓN DIRECTA
-        async function procesarEInyectarSupabase() {
-            const btn = document.getElementById('btnInyectar');
-            if(!supabaseClient) {
-                // Fallback local instantáneo si se usa sin claves
-                inventarioMemoria = datosExcelPreparados;
-                alert(`Carga de simulación completada en local (${inventarioMemoria.length} herramientas). Recuerda conectar Supabase para persistencia.`);
-                document.getElementById('dbStatusBadge').innerHTML = `<strong>Modo Local Temporal:</strong> Operando con ${inventarioMemoria.length} herramientas en memoria de sesión.`;
-                btn.classList.add('hidden');
-                return;
-            }
+            const card = document.getElementById('resultCard');            
+            card.classList.remove('hidden');            
+            document.getElementById('resName').innerText = `Zona: ${zonaNombre}`;            
 
-            btn.disabled = true;
-            btn.innerHTML = "<i class='fa-solid fa-spinner animate-spin'></i> Escribiendo en Supabase de forma segura...";
+            if(herramientasEnZona.length > 0) {                
+                const totalUnidades = herramientasEnZona.reduce((acc, current) => acc + (parseInt(current.cantidad) || 0), 0);                
+                document.getElementById('resQty').innerText = `${herramientasEnZona.length} tipos de ítems (${totalUnidades} uds totales)`;                                
+                const listaHtml = herramientasEnZona.map(i => `• [${i.cantidad} ud] ${i.herramienta}`).join('\n');                
+                document.getElementById('resLoc').innerText = listaHtml;            
+            } else {                
+                document.getElementById('resQty').innerText = "Vacío / Sin registros";                
+                document.getElementById('resLoc').innerText = "No se encontraron herramientas mapeadas en esta ubicación.";            
+            }        
+        }        
 
-            try {
-                const { error } = await supabaseClient
-                    .from('inventario')
-                    .upsert(datosExcelPreparados, { onConflict: 'herramienta' });
+        function resetearPlanoTaller() {            
+            const zonas = ["MAP_ELEVACION", "MAP_ARMARIO1", "MAP_TRANSMISIONES", "MAP_ARMARIO2", "MAP_ARMARIO4", "MAP_ELECTROMECANICA", "MAP_CARROCERIA", "MAP_PREPARACION", "MAP_PINTURA", "MAP_ARMARIO3"];            
+            zonas.forEach(z => { const el = document.getElementById(z); if(el) el.classList.remove('highlight-zone'); });        
+        }        
 
-                if(error) throw error;
+        function iluminarZonaTaller(textoUbicacion) {            
+            resetearPlanoTaller();            
+            const u = textoUbicacion.toUpperCase();            
+            if(u.includes("ARMARIO 1")) document.getElementById("MAP_ARMARIO1").classList.add('highlight-zone');            
+            else if(u.includes("ARMARIO 2")) document.getElementById("MAP_ARMARIO2").classList.add('highlight-zone');            
+            else if(u.includes("ARMARIO 3")) document.getElementById("MAP_ARMARIO3").classList.add('highlight-zone');            
+            else if(u.includes("ARMARIO 4")) document.getElementById("MAP_ARMARIO4").classList.add('highlight-zone');            
+            else if(u.includes("ELEVACIÓN")) document.getElementById("MAP_ELEVACION").classList.add('highlight-zone');            
+            else if(u.includes("TRANSMISIONES")) document.getElementById("MAP_TRANSMISIONES").classList.add('highlight-zone');            
+            else if(u.includes("ELECTROMECÁNICA")) document.getElementById("MAP_ELECTROMECANICA").classList.add('highlight-zone');            
+            else if(u.includes("CARROCERÍA")) document.getElementById("MAP_CARROCERIA").classList.add('highlight-zone');            
+            else if(u.includes("PREPARACIÓN")) document.getElementById("MAP_PREPARACION").classList.add('highlight-zone');            
+            else if(u.includes("PINTURA")) document.getElementById("MAP_PINTURA").classList.add('highlight-zone');        
+        }        
 
-                alert("¡Base de datos actualizada! Los registros nuevos se han insertado y los existentes se han actualizado sin duplicarse.");
-                datosExcelPreparados = null;
-                btn.classList.add('hidden');
-                await comprobarBaseDatosReal();
-            } catch(err) {
-                alert("Error en la nube: " + err.message + "\n\nVerifica si ejecutaste el comando UNIQUE en Supabase.");
-                btn.disabled = false;
-                btn.innerHTML = "❌ Reintentar Subida";
-            }
-        }
+        let visualizadorAbierto = false;        
+        function toggleVisualizador() {            
+            visualizadorAbierto = !visualizadorAbierto;            
+            document.getElementById('dbInspector').classList.toggle('hidden', !visualizadorAbierto);            
+            document.getElementById('eyeIcon').className = visualizadorAbierto ? "fa-solid fa-chevron-up" : "fa-solid fa-chevron-down";        
+        }        
 
-        // BUSCADOR ESTRICTO MEJORADO
-        function configurarBuscadorEstricto() {
-            const input = document.getElementById('searchInput');
-            const menu = document.getElementById('customDropdown');
+        async function enviarMensajeChat() {            
+            const input = document.getElementById('chatInput');            
+            const msg = input.value.trim();            if(!msg) return;            
 
-            input.addEventListener('input', (e) => {
-                const text = e.target.value.trim().toLowerCase();
-                menu.innerHTML = "";
+            appendMsg("Tú", msg);            
+            input.value = "";            
 
-                if (text.length < 2) {
-                    menu.classList.add('hidden');
-                    return;
-                }
+            const chatBox = document.getElementById('chatBox');            
+            const loadingEl = document.createElement('div');            
+            loadingEl.id = "geminiChatLoading";            
+            loadingEl.className = "p-2 rounded-lg bg-slate-900/60 border border-slate-800 mr-6 text-slate-400 animate-pulse flex items-center gap-2";            
+            loadingEl.innerHTML = `<span class="font-bold text-[10px] text-purple-400">GEM</span><p class="text-[11px]"><i class="fa-solid fa-circle-notch animate-spin text-purple-500 mr-1"></i> Buscando útil en el taller...</p>`;            
+            chatBox.appendChild(loadingEl);            
+            chatBox.scrollTop = chatBox.scrollHeight;            
 
-                // Filtrado por coincidencia estricta de caracteres de manera directa
-                const coincidencias = inventarioMemoria.filter(item => 
-                    item.herramienta.toLowerCase().includes(text)
-                ).slice(0, 8); // Limitamos a un máximo de 8 resultados para no saturar la vista
+            const apiKeyValue = document.getElementById('geminiKey').value.trim();                        
+            if(!apiKeyValue || apiKeyValue.includes("_AQUI")) {                
+                let match = inventarioMemoria.find(item => msg.toLowerCase().includes(item.herramienta.toLowerCase()));                
+                setTimeout(() => {                    
+                    if(document.getElementById("geminiChatLoading")) document.getElementById("geminiChatLoading").remove();                    
+                    if(match) {                        
+                        const r = `Herramienta: ${match.herramienta}. Ubicación: ${match.ubicacion}. Stock: ${match.cantidad}.`;                        
+                        appendMsg("GEM", r); ejecutarLocucion(r); iluminarZonaTaller(match.ubicacion);                    
+                    } else {                        
+                        const f = "No se dispone de dicha herramienta.";                        
+                        appendMsg("GEM", f); ejecutarLocucion(f); resetearPlanoTaller();                    
+                    }                
+                }, 400);                
+                return;            
+            }            
 
-                if (coincidencias.length > 0) {
-                    menu.classList.remove('hidden');
-                    coincidencias.forEach(item => {
-                        const divOpcion = document.createElement('div');
-                        divOpcion.className = "px-3 py-2 hover:bg-slate-800 cursor-pointer text-slate-200 transition-colors flex justify-between";
-                        divOpcion.innerHTML = `<span>${item.herramienta}</span> <span class="text-[10px] text-slate-500 italic">${item.ubicacion}</span>`;
-                        
-                        divOpcion.addEventListener('click', () => {
-                            input.value = item.herramienta;
-                            menu.classList.add('hidden');
-                            ejecutarBusquedaManual();
-                        });
-                        menu.appendChild(divOpcion);
-                    });
-                } else {
-                    menu.classList.add('hidden');
-                }
-            });
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKeyValue}`;            
+            const directriz = `Eres GEM, la IA encargada de guiar al alumno en el taller mecánico. Tu base de conocimientos real de Supabase es este JSON exacto: ${JSON.stringify(inventarioMemoria)}.            
+            El alumno te pregunta: "${msg}".            
+            Responde de manera muy breve indicando su ubicación y stock. Si el elemento consultado NO guarda relación con los datos del JSON o está vacío, responde única y exclusivamente con la frase literal: "No se dispone de dicha herramienta", sin añadir justificaciones ni saludos extras.`;            
 
-            document.addEventListener('click', (e) => {
-                if (!input.contains(e.target) && !menu.contains(e.target)) {
-                    menu.classList.add('hidden');
-                }
-            });
-        }
+            try {                
+                const response = await fetch(url, {                    
+                    method: 'POST',                    
+                    headers: { 'Content-Type': 'application/json' },                    
+                    body: JSON.stringify({ contents: [{ parts: [{ text: directriz }] }] })                
+                });                
+                const resData = await response.json();                
+                const aiMsg = resData.candidates[0].content.parts[0].text;                                
 
-        function ejecutarBusquedaManual() {
-            const query = document.getElementById('searchInput').value.trim();
-            if(!query) return;
+                if(document.getElementById("geminiChatLoading")) document.getElementById("geminiChatLoading").remove();                
 
-            const encontrado = inventarioMemoria.find(item => 
-                item.herramienta.toLowerCase() === query.toLowerCase() ||
-                item.herramienta.toLowerCase().includes(query.toLowerCase())
-            );
+                appendMsg("GEM", aiMsg);                
+                ejecutarLocucion(aiMsg);                                
 
-            if (encontrado) {
-                document.getElementById('resultCard').classList.remove('hidden');
-                document.getElementById('resName').innerText = encontrado.herramienta;
-                document.getElementById('resQty').innerText = encontrado.cantidad;
-                document.getElementById('resLoc').innerText = encontrado.ubicacion;
-                iluminarZonaTaller(encontrado.ubicacion);
-            } else {
-                document.getElementById('resultCard').classList.add('hidden');
-                alert(`"${query}" no consta en el inventario.`);
-                resetearPlanoTaller();
-            }
-        }
+                const up = aiMsg.toUpperCase();                
+                if(up.includes("ARMARIO 1")) iluminarZonaTaller("ARMARIO 1");                
+                else if(up.includes("ARMARIO 2")) iluminarZonaTaller("ARMARIO 2");                
+                else if(up.includes("ARMARIO 3")) iluminarZonaTaller("ARMARIO 3");                
+                else if(up.includes("ARMARIO 4")) iluminarZonaTaller("ARMARIO 4");                
+                else if(up.includes("ELEVACIÓN")) iluminarZonaTaller("ELEVACIÓN");                
+                else if(up.includes("TRANSMISIONES")) iluminarZonaTaller("TRANSMISIONES");                
+                else if(up.includes("ELECTROMECÁNICA")) iluminarZonaTaller("ELECTROMECÁNICA");                
+                else if(up.includes("CARROCERÍA")) iluminarZonaTaller("CARROCERÍA");                
+                else if(up.includes("PREPARACIÓN")) iluminarZonaTaller("PREPARACIÓN");                
+                else if(up.includes("PINTURA")) iluminarZonaTaller("PINTURA");                                
+                if(aiMsg.toLowerCase().includes("no se dispone")) resetearPlanoTaller();            
+            } catch (err) {                
+                console.error(err);                
+                if(document.getElementById("geminiChatLoading")) document.getElementById("geminiChatLoading").remove();                
+                appendMsg("GEM", "Error de comunicación o API Key incorrecta.");            
+            }        
+        }        
 
-        function resetearPlanoTaller() {
-            const zonas = ["MAP_ELEVACION", "MAP_ARMARIO1", "MAP_TRANSMISIONES", "MAP_ARMARIO2", "MAP_ARMARIO4", "MAP_ELECTROMECANICA", "MAP_CARROCERIA", "MAP_PREPARACION", "MAP_PINTURA", "MAP_ARMARIO3"];
-            zonas.forEach(z => { const el = document.getElementById(z); if(el) el.classList.remove('highlight-zone'); });
-        }
+        function activarVozBusqueda() { lanzarReconocimiento('searchInput', () => ejecutarBusquedaManual()); }        
+        function activarVozChat() { lanzarReconocimiento('chatInput', () => enviarMensajeChat()); }        
 
-        function iluminarZonaTaller(textoUbicacion) {
-            resetearPlanoTaller();
-            const u = textoUbicacion.toUpperCase();
-            if(u.includes("ARMARIO 1")) document.getElementById("MAP_ARMARIO1").classList.add('highlight-zone');
-            else if(u.includes("ARMARIO 2")) document.getElementById("MAP_ARMARIO2").classList.add('highlight-zone');
-            else if(u.includes("ARMARIO 3")) document.getElementById("MAP_ARMARIO3").classList.add('highlight-zone');
-            else if(u.includes("ARMARIO 4")) document.getElementById("MAP_ARMARIO4").classList.add('highlight-zone');
-            else if(u.includes("ELEVACIÓN")) document.getElementById("MAP_ELEVACION").classList.add('highlight-zone');
-            else if(u.includes("TRANSMISIONES")) document.getElementById("MAP_TRANSMISIONES").classList.add('highlight-zone');
-            else if(u.includes("ELECTROMECÁNICA")) document.getElementById("MAP_ELECTROMECANICA").classList.add('highlight-zone');
-            else if(u.includes("CARROCERÍA")) document.getElementById("MAP_CARROCERIA").classList.add('highlight-zone');
-            else if(u.includes("PREPARACIÓN")) document.getElementById("MAP_PREPARACION").classList.add('highlight-zone');
-            else if(u.includes("PINTURA")) document.getElementById("MAP_PINTURA").classList.add('highlight-zone');
-        }
+        function lanzarReconocimiento(idInput, callback) {            
+            const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;            
+            if(!Speech) return;            
+            const rec = new Speech(); rec.lang = 'es-ES';            
+            rec.onresult = (e) => { document.getElementById(idInput).value = e.results[0][0].transcript.replace(/\.$/, ''); callback(); };            
+            rec.start();        
+        }        
 
-        let visualizadorAbierto = false;
-        function toggleVisualizador() {
-            visualizadorAbierto = !visualizadorAbierto;
-            document.getElementById('dbInspector').classList.toggle('hidden', !visualizadorAbierto);
-            document.getElementById('eyeIcon').className = visualizadorAbierto ? "fa-solid fa-chevron-up" : "fa-solid fa-chevron-down";
-        }
+        function ejecutarLocucion(texto) {            
+            if ('speechSynthesis' in window) {                
+                window.speechSynthesis.cancel();                
+                const u = new SpeechSynthesisUtterance(texto); u.lang = 'es-ES';                
+                window.speechSynthesis.speak(u);            
+            }        
+        }        
 
-        async function enviarMensajeChat() {
-            const input = document.getElementById('chatInput');
-            const msg = input.value.trim();
-            if(!msg) return;
+        function setChatSystemMessage(texto) {            
+            document.getElementById('chatBox').innerHTML = `<div class="text-slate-500 text-[10px] text-center italic border-b border-slate-900 pb-1">${texto}</div>`;        
+        }        
 
-            appendMsg("Tú", msg);
-            input.value = "";
-
-            const apiKeyValue = document.getElementById('geminiKey').value.trim();
-            
-            if(!apiKeyValue) {
-                let match = inventarioMemoria.find(item => msg.toLowerCase().includes(item.herramienta.toLowerCase()));
-                setTimeout(() => {
-                    if(match) {
-                        const r = `Herramienta: ${match.herramienta}. Ubicación: ${match.ubicacion}. Stock: ${match.cantidad}.`;
-                        appendMsg("GEM", r); ejecutarLocucion(r); iluminarZonaTaller(match.ubicacion);
-                    } else {
-                        const f = "No se dispone de dicha herramienta.";
-                        appendMsg("GEM", f); ejecutarLocucion(f); resetearPlanoTaller();
-                    }
-                }, 250);
-                return;
-            }
-
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKeyValue}`;
-            const directriz = `Eres GEM, la IA encargada de guiar al alumno en el taller mecánico. Tu base de conocimientos real de Supabase es este JSON exacto: ${JSON.stringify(inventarioMemoria)}.
-            El alumno te pregunta: "${msg}".
-            Responde de manera muy breve indicando su ubicación y stock. Si el elemento consultado NO guarda relación con los datos del JSON, responde única y exclusivamente con la frase literal: "No se dispone de dicha herramienta", sin añadir justificaciones ni saludos extras.`;
-
-            try {
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: directriz }] }] })
-                });
-                const resData = await response.json();
-                const aiMsg = resData.candidates[0].content.parts[0].text;
-                
-                appendMsg("GEM", aiMsg);
-                ejecutarLocucion(aiMsg);
-                
-                const up = aiMsg.toUpperCase();
-                if(up.includes("ARMARIO 1")) iluminarZonaTaller("ARMARIO 1");
-                else if(up.includes("ARMARIO 2")) iluminarZonaTaller("ARMARIO 2");
-                else if(up.includes("ARMARIO 3")) iluminarZonaTaller("ARMARIO 3");
-                else if(up.includes("ARMARIO 4")) iluminarZonaTaller("ARMARIO 4");
-                else if(up.includes("ELEVACIÓN")) iluminarZonaTaller("ELEVACIÓN");
-                else if(up.includes("TRANSMISIONES")) iluminarZonaTaller("TRANSMISIONES");
-                else if(up.includes("ELECTROMECÁNICA")) iluminarZonaTaller("ELECTROMECÁNICA");
-                else if(up.includes("CARROCERÍA")) iluminarZonaTaller("CARROCERÍA");
-                else if(up.includes("PREPARACIÓN")) iluminarZonaTaller("PREPARACIÓN");
-                else if(up.includes("PINTURA")) iluminarZonaTaller("PINTURA");
-                
-                if(aiMsg.toLowerCase().includes("no se dispone")) resetearPlanoTaller();
-            } catch (err) {
-                console.error(err);
-            }
-        }
-
-        function activarVozBusqueda() { lanzarReconocimiento('searchInput', () => ejecutarBusquedaManual()); }
-        function activarVozChat() { lanzarReconocimiento('chatInput', () => enviarMensajeChat()); }
-
-        function lanzarReconocimiento(idInput, callback) {
-            const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if(!Speech) return;
-            const rec = new Speech(); rec.lang = 'es-ES';
-            rec.onresult = (e) => { document.getElementById(idInput).value = e.results[0][0].transcript.replace(/\.$/, ''); callback(); };
-            rec.start();
-        }
-
-        function ejecutarLocucion(texto) {
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-                const u = new SpeechSynthesisUtterance(texto); u.lang = 'es-ES';
-                window.speechSynthesis.speak(u);
-            }
-        }
-
-        function setChatSystemMessage(texto) {
-            document.getElementById('chatBox').innerHTML = `<div class="text-slate-500 text-[10px] text-center italic border-b border-slate-900 pb-1">${texto}</div>`;
-        }
-
-        function appendMsg(remitante, texto) {
-            const box = document.getElementById('chatBox');
-            const el = document.createElement('div');
-            const soyYo = remitante === "Tú";
-            el.className = `p-2 rounded-lg ${soyYo ? 'bg-purple-950/40 border border-purple-800 ml-6 text-right' : 'bg-slate-900 border border-slate-700 mr-6'}`;
-            el.innerHTML = `<span class="font-bold block text-[10px] ${soyYo ? 'text-purple-400' : 'text-cyan-400'}">${remitante}</span> <p class="mt-0.5 text-slate-200">${texto}</p>`;
-            box.appendChild(el); box.scrollTop = box.scrollHeight;
-        }
+        function appendMsg(remitante, texto) {            
+            const box = document.getElementById('chatBox');            
+            const el = document.createElement('div');            
+            const soyYo = remitante === "Tú";            
+            el.className = `p-2 rounded-lg ${soyYo ? 'bg-purple-950/40 border border-purple-800 ml-6 text-right' : 'bg-slate-900 border border-slate-700 mr-6'}`;            
+            el.innerHTML = `<span class="font-bold block text-[10px] ${soyYo ? 'text-purple-400' : 'text-cyan-400'}">${remitante}</span> <p class="mt-0.5 text-slate-200">${texto}</p>`;            
+            box.appendChild(el); box.scrollTop = box.scrollHeight;        
+        }    
     </script>
 </body>
 </html>
